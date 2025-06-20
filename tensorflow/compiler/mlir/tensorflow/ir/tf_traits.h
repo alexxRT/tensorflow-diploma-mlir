@@ -322,6 +322,53 @@ class UniqueResourceAllocation
   }
 };
 
+template <typename ConcreteType>
+class ProfileAnnotation : public TraitBase<ConcreteType, ProfileAnnotation> {
+    public:
+    // Implements methods required for TF_ProfilerAnnotationsInterface
+    void AttachProfilerData(const ProfilerData& data) {
+        Operation* op = this->getOperation();
+        MLIRContext* context = op->getContext();
+
+        Builder builder(context);
+
+        auto tsAttr = builder.getI64IntegerAttr(data.timestamp);
+        auto durationAttr = builder.getI64IntegerAttr(data.duration);
+
+        NamedAttribute attrs[] = {
+            builder.getNamedAttr("ts", tsAttr),
+            builder.getNamedAttr("dur", durationAttr)
+        };
+
+        auto dictAttr = DictionaryAttr::get(context, attrs);
+        op->setAttr("profiler_data", dictAttr);
+    }
+
+    ProfilerData GetProfilerData() {
+        Operation* op = this->getOperation();
+        if (!HasProfilerData())
+            return ProfilerData{};
+
+        auto dictAttr = op->getAttrOfType<DictionaryAttr>("profiler_data");
+
+        ProfilerData data{};
+        if (auto tsAttr = dictAttr.get("ts").dyn_cast_or_null<IntegerAttr>())
+            data.timestamp = tsAttr.getInt();
+        if (auto durationAttr = dictAttr.get("dur").dyn_cast_or_null<IntegerAttr>())
+            data.duration = durationAttr.getInt();
+
+        return data;
+    }
+
+    bool HasProfilerData() {
+        Operation* op = this->getOperation();
+        auto dictAttr = llvm::dyn_cast_or_null<DictionaryAttr>(op->getAttr("profiler_data"));
+        if (!dictAttr)
+            return false;
+        return true;
+    }
+};
+
 }  // namespace TF
 }  // namespace OpTrait
 }  // namespace mlir

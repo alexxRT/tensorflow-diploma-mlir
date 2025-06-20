@@ -134,6 +134,18 @@ ResourceHandleValueAndId GetResourceHandleValueAndIdBase(
         inferredReturnShapes);                                        \
   }
 
+//===----------------------------------------------------------------------===//
+// TF helper structure to handle storing and use profiler data.
+//===----------------------------------------------------------------------===//
+
+struct ProfilerData {
+    ProfilerData(int ts, int dur) : timestamp(ts), duration(dur) {};
+
+    // maybe expand further as analysis grows
+    int timestamp;
+    int duration;
+}
+
 #include "tensorflow/compiler/mlir/tensorflow/ir/tf_op_interfaces.h.inc"
 }  // namespace TF
 }  // namespace mlir
