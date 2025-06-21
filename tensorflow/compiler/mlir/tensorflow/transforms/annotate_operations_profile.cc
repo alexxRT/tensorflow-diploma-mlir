@@ -31,6 +31,7 @@ limitations under the License.
 #include "mlir/Support/LLVM.h"  // from @llvm-project
 #include "tensorflow/compiler/mlir/tensorflow/ir/tf_device.h"
 #include "tensorflow/compiler/mlir/tensorflow/ir/tf_ops.h"
+#include "tensorflow/compiler/mlir/tensorflow/ir/tf_traits.h"
 #include "tensorflow/compiler/mlir/tensorflow/ir/tf_op_interfaces.h"
 #include "tensorflow/compiler/mlir/tensorflow/transforms/passes.h"
 
@@ -62,12 +63,12 @@ void AnnotateOperationsProfilePass::runOnOperation() {
   op.walk([&](mlir::Operation* nestedOp) {
     if (nestedOp->getDialect() &&
         nestedOp->getDialect()->getNamespace() == "tf") {
-
-        // TODO: readProfilerData();
-        ProfilerData data;
-        readProfilerData(&data, nestedOp);
-
-        nestedOp->AttachProfilerData(data);
+        if (nestedOp->hasTrait<ProfileAnnotation>()) {
+            // TODO: readProfilerData();
+            ProfilerData data;
+            readProfilerData(&data, nestedOp);
+            nestedOp->AttachProfilerData(data);
+        }
     }
   });
 }
