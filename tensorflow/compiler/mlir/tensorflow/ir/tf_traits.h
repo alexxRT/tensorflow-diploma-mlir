@@ -326,7 +326,7 @@ template <typename ConcreteType>
 class ProfileAnnotation : public TraitBase<ConcreteType, ProfileAnnotation> {
     public:
     // Implements methods required for TF_ProfilerAnnotationsInterface
-    void AttachProfilerData(const ProfilerData& data) {
+    void AttachProfilerData(const mlir::TF::ProfilerData& data) {
         Operation* op = this->getOperation();
         MLIRContext* context = op->getContext();
 
@@ -344,17 +344,17 @@ class ProfileAnnotation : public TraitBase<ConcreteType, ProfileAnnotation> {
         op->setAttr("profiler_data", dictAttr);
     }
 
-    ProfilerData GetProfilerData() {
+    mlir::TF::ProfilerData GetProfilerData() {
         Operation* op = this->getOperation();
         if (!HasProfilerData())
-            return ProfilerData{};
+            return mlir::TF::ProfilerData(0, 0);
 
         auto dictAttr = op->getAttrOfType<DictionaryAttr>("profiler_data");
 
-        ProfilerData data{};
-        if (auto tsAttr = dictAttr.get("ts").dyn_cast_or_null<IntegerAttr>())
+        mlir::TF::ProfilerData data(0, 0);
+        if (auto tsAttr = mlir::dyn_cast_or_null<IntegerAttr>(dictAttr.get("ts")))
             data.timestamp = tsAttr.getInt();
-        if (auto durationAttr = dictAttr.get("dur").dyn_cast_or_null<IntegerAttr>())
+        if (auto durationAttr = mlir::dyn_cast_or_null<IntegerAttr>(dictAttr.get("dur")))
             data.duration = durationAttr.getInt();
 
         return data;
@@ -362,7 +362,7 @@ class ProfileAnnotation : public TraitBase<ConcreteType, ProfileAnnotation> {
 
     bool HasProfilerData() {
         Operation* op = this->getOperation();
-        auto dictAttr = llvm::dyn_cast_or_null<DictionaryAttr>(op->getAttr("profiler_data"));
+        auto dictAttr = mlir::dyn_cast_or_null<DictionaryAttr>(op->getAttr("profiler_data"));
         if (!dictAttr)
             return false;
         return true;

@@ -63,18 +63,20 @@ void AnnotateOperationsProfilePass::runOnOperation() {
   op.walk([&](mlir::Operation* nestedOp) {
     if (nestedOp->getDialect() &&
         nestedOp->getDialect()->getNamespace() == "tf") {
-        if (nestedOp->hasTrait<ProfileAnnotation>()) {
+        if (nestedOp->hasTrait<OpTrait::TF::ProfileAnnotation>()) {
             // TODO: readProfilerData();
-            ProfilerData data;
+            ProfilerData data(0, 0);
             readProfilerData(&data, nestedOp);
-            nestedOp->AttachProfilerData(data);
+
+            auto profileOp = dyn_cast<OpTrait::TF::ProfileAnnotation<Operation*>>(nestedOp);
+            profileOp.AttachProfilerData(data);
         }
     }
   });
 }
 
 void AnnotateOperationsProfilePass::readProfilerData(ProfilerData* data, Operation* op) {
-    StringRef opName = op->getName()->getStringRef();
+    StringRef opName = op->getName().getStringRef();
     Location opLoc = op->getLoc(); // might be useful for mapping
 
     // TODO: Add read profile from file and mapping to current node
@@ -83,8 +85,13 @@ void AnnotateOperationsProfilePass::readProfilerData(ProfilerData* data, Operati
 }
 
 std::unique_ptr<OperationPass<ModuleOp>>
-CreateAnnotateOperationsProfilerPass(const std::string& profileFilePath) {
+CreateAnnotateOperationsProfilePass(const std::string& profileFilePath) {
   return std::make_unique<AnnotateOperationsProfilePass>(profileFilePath);
+}
+
+std::unique_ptr<OperationPass<ModuleOp>>
+CreateAnnotateOperationsProfilePass() {
+  return std::make_unique<AnnotateOperationsProfilePass>();
 }
 
 }  // namespace TF
