@@ -184,6 +184,31 @@ void CreateTFStandardPipeline(OpPassManager &pm,
   pm.addNestedPass<func::FuncOp>(createCSEPass());
 }
 
+
+void CreateTFProfileGuidedPipeline(OpPassManager &pm,
+                              const ProfileGuidedPipelineOptions &options) {
+
+    if (options.enable_profile) {
+        OpPassManager &module_op_pm = pm.nest<ModuleOP>();
+        if (options.path_to_profile.empty()) {
+            llvm::outs() << "[TFProfileGuided]: WARNING No file presented to load profile data. ";
+            llvm::outs() << "Result transformations are likely ide. Using default annonations.\n"
+        }
+        else {
+            llvm::outs() << "[TFProfileGuided]: Loading profile from " << options.path_to_profile << ".\n";
+        }
+
+        module_op_pm.addPass(TF::CreateAnnotateOperationsProfilerPass(options.path_to_profile));
+        // add profiler annotations to TensorFlow operations
+
+
+        // perform here later profile guided transformations
+        // ...
+        // magister work part
+        // ...
+    }
+}
+
 std::unique_ptr<OperationPass<func::FuncOp>> CreateTFOptimizePass() {
   return std::make_unique<TensorFlowOptimizePass>();
 }
@@ -196,6 +221,14 @@ void RegisterTFOptimizePassPipeline() {
       "Run all the passes involved in transforming/optimizing the graph after "
       "importing into MLIR, without any target specialization.",
       CreateTFStandardPipeline);
+}
+
+void RegisterTFOptimizeProfilePassPipeline() {
+    static mlir::PassPipelineRegistration<ProfileGuidedPipelineOptions> pipeline(
+        "tf-pgo-pipeline",
+        "Run all the passes involved in transforming/optimizing the graph after "
+        "importing into MLIR, with target specialization.",
+        CreateTFProfileGuidedPipeline);
 }
 
 }  // namespace TF

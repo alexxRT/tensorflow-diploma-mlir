@@ -183,11 +183,29 @@ struct StandardPipelineOptions
       llvm::cl::init(false)};
 };
 
+struct ProfileGuidedPipelineOptions
+    : public PassPipelineOptions<ProfileGuidedPipelineOptions> {
+  Option<bool> enable_profile{*this, "enable-profile",
+                              llvm::cl::desc("Enable PGO transformations."),
+                              llvm::cl::init(false)};
+  Option<std::string> path_to_profile{*this, "path-to-profile",
+                                      llvm::cl::desc("Path to serialized TF Profiler output"),
+                                      llvm::cl::init("")};
+};
+
 // Propagates the pass manager with the passes involved in transforming or
 // optimizing an MLIR graph without any target specialization.
 // NOLINTNEXTLINE - MLIR contract is pass by mutable reference.
 void CreateTFStandardPipeline(OpPassManager& pm,
                               const StandardPipelineOptions& options);
+
+// Alternaive approach of performing transformation based on profile data.
+// Optimazing MLIR graph with target specialization
+void CreateTFProfileGuidedPipeline(OpPassManager& pm,
+                                   const ProfileGuidedPipelineOptions& options);
+
+// Annotates all tf operations with TensorFlow Profiler data
+std::unique_ptr<OperationPass<ModuleOp>> CreateAnnotateOperationsProfilerPass(const std::string& profileFilePath);
 
 // Propagates device attributes of resources from callers to callees.
 std::unique_ptr<OperationPass<ModuleOp>> CreateResourceDeviceInferencePass();
@@ -693,6 +711,7 @@ enum MoveTransposeDirection { kBegin, kEnd };
 using namespace detail;  // NOLINT
 inline void registerTensorFlowPasses() {
   detail::registerTensorFlowPasses();
+  TF::RegisterTFOptimizeProfilePassPipeline();
   TF::RegisterTFOptimizePassPipeline();
 }
 

@@ -17,6 +17,16 @@ include "mlir/Pass/PassBase.td"
 
 // TF dialect passes.
 
+def AnnotateOperationsProfilePass : Pass<"tf-op-profile", "ModuleOp"> {
+    let summary = "Annotate all tf nested operations with profiler data";
+    let description = [{
+        This pass is performing annotation with collected profile with TensorFlow Profiler.
+        For now its annotated with (timestamp, duration). Will be expanded later.
+        Planning to perform on profiler data analysis and transforms.
+    }];
+    let constructor="TF::CreateAnnotateOperationsProfilePass()";
+}
+
 def TensorflowGPUFusion : Pass<"tf-gpu-op-fusion", "mlir::func::FuncOp"> {
   let summary = "Fusion optimization for GPU targets";
   let description = [{
