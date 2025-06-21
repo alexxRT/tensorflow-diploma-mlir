@@ -163,25 +163,28 @@ def TF_GetResourceInstanceInterface : OpInterface<"GetResourceInstanceInterface"
 //===----------------------------------------------------------------------===//
 
 def TF_ProfilerAnnotationsInterface : OpInterface<"ProfilerAnnotationsInterface"> {
-    let description = [{Methods to get/attach profiler data as annotations}]
+    let description = [{Methods to get/attach profiler data as annotations}];
 
     let methods = [
         InterfaceMethod<
+            /*desc=*/[{Takes profiler data on input and creates named attribuites for operation.}],
             /*retTy=*/"void",
             /*methodName=*/"AttachProfilerData",
-            /*args*/(ins "const ProfilerData&":$data)
+            /*args=*/(ins "const ProfilerData&":$data)
         >,
         InterfaceMethod<
+            /*desc=*/[{Retrieves profile annotations and returns in serialized ProfileData structure.}],
             /*retTy=*/"ProfilerData",
             /*methodName=*/"GetProfilerData",
-            /*args*/(ins)
+            /*args=*/(ins)
         >,
         InterfaceMethod<
+            /*desc=*/[{Checks if opperation has named profile attribuite to be retrieved.}],
             /*retTy=*/"bool",
             /*methodName=*/"HasProfilerData",
-            /*args*/(ins)
+            /*args=*/(ins)
         >
-    ]
+    ];
 }
 
 #endif // TF_OP_INTERFACES

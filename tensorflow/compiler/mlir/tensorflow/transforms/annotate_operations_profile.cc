@@ -83,8 +83,13 @@ void AnnotateOperationsProfilePass::readProfilerData(ProfilerData* data, Operati
 }
 
 std::unique_ptr<OperationPass<ModuleOp>>
-CreateAnnotateOperationsProfilerPass(const std::string& profileFilePath) {
+CreateAnnotateOperationsProfilePass(const std::string& profileFilePath) {
   return std::make_unique<AnnotateOperationsProfilePass>(profileFilePath);
+}
+
+std::unique_ptr<OperationPass<ModuleOp>>
+CreateAnnotateOperationsProfilePass() {
+  return std::make_unique<AnnotateOperationsProfilePass>();
 }
 
 }  // namespace TF

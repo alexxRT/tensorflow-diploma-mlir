@@ -205,7 +205,8 @@ void CreateTFProfileGuidedPipeline(OpPassManager& pm,
                                    const ProfileGuidedPipelineOptions& options);
 
 // Annotates all tf operations with TensorFlow Profiler data
-std::unique_ptr<OperationPass<ModuleOp>> CreateAnnotateOperationsProfilerPass(const std::string& profileFilePath);
+std::unique_ptr<OperationPass<ModuleOp>> CreateAnnotateOperationsProfilePass(const std::string& profileFilePath);
+std::unique_ptr<OperationPass<ModuleOp>> CreateAnnotateOperationsProfilePass();
 
 // Propagates device attributes of resources from callers to callees.
 std::unique_ptr<OperationPass<ModuleOp>> CreateResourceDeviceInferencePass();

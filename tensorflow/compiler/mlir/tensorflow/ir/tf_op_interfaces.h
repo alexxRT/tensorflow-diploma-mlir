@@ -144,11 +144,12 @@ struct ProfilerData {
     // maybe expand further as analysis grows
     int timestamp;
     int duration;
-}
+};
 
 #include "tensorflow/compiler/mlir/tensorflow/ir/tf_op_interfaces.h.inc"
 }  // namespace TF
 }  // namespace mlir
+
 
 namespace llvm {
 template <>

@@ -428,6 +428,7 @@ cc_library(
     srcs = [
         "add_functions_for_exported_names.cc",
         "annotate_parameter_replication.cc",
+        "annotate_operations_profile.cc",
         "batchmatmul_to_einsum.cc",
         "breakup-islands.cc",
         "canonicalize_compile_and_replicate_attributes.cc",
