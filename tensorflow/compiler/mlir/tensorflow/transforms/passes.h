@@ -185,9 +185,6 @@ struct StandardPipelineOptions
 
 struct ProfileGuidedPipelineOptions
     : public PassPipelineOptions<ProfileGuidedPipelineOptions> {
-  Option<bool> enable_profile{*this, "enable-profile",
-                              llvm::cl::desc("Enable PGO transformations."),
-                              llvm::cl::init(false)};
   Option<std::string> path_to_profile{*this, "path-to-profile",
                                       llvm::cl::desc("Path to serialized TF Profiler output"),
                                       llvm::cl::init("")};
@@ -210,6 +207,9 @@ std::unique_ptr<OperationPass<ModuleOp>> CreateAnnotateOperationsProfilePass();
 
 // Propagates device attributes of resources from callers to callees.
 std::unique_ptr<OperationPass<ModuleOp>> CreateResourceDeviceInferencePass();
+
+// PGO piprline
+void RegisterTFOptimizeProfilePassPipeline();
 
 // Creates a pass that promotes resource reads/writes in `functions` to inputs
 // and outputs of `functions`, assuming that resource operations have already

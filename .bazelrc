@@ -69,6 +69,9 @@
 # LINT.IfChange
 # Default build options. These are applied first and unconditionally.
 
+startup --host_jvm_args=-Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts \
+        --host_jvm_args=-Djavax.net.ssl.trustStorePassword=changeit
+
 # These are used to generate the ML wheel version string.
 # See the explanation in the file comment of
 # @local_xla//third_party/py/python_wheel.bzl.
@@ -82,6 +85,7 @@ build --repo_env=ML_WHEEL_VERSION_SUFFIX=""
 # For projects which use TensorFlow as part of a Bazel build process, putting
 # nothing in a bazelrc will default to a monolithic build. The following line
 # opts in to modular op registration support by default.
+
 build --define framework_shared_object=true
 build --define tsl_protobuf_header_only=true
 

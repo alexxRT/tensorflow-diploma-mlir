@@ -29,6 +29,7 @@ limitations under the License.
 #include "mlir/Pass/Pass.h"  // from @llvm-project
 #include "mlir/Pass/PassRegistry.h"  // from @llvm-project
 #include "mlir/Support/LLVM.h"  // from @llvm-project
+#include "llvm/Support/Casting.h" // from @llvm-project
 #include "tensorflow/compiler/mlir/tensorflow/ir/tf_device.h"
 #include "tensorflow/compiler/mlir/tensorflow/ir/tf_ops.h"
 #include "tensorflow/compiler/mlir/tensorflow/ir/tf_traits.h"
@@ -61,20 +62,17 @@ void AnnotateOperationsProfilePass::runOnOperation() {
   ModuleOp op = getOperation();
 
   op.walk([&](mlir::Operation* nestedOp) {
-    if (nestedOp->getDialect() &&
-        nestedOp->getDialect()->getNamespace() == "tf") {
-        if (nestedOp->hasTrait<ProfileAnnotation>()) {
-            // TODO: readProfilerData();
-            ProfilerData data;
-            readProfilerData(&data, nestedOp);
-            nestedOp->AttachProfilerData(data);
-        }
+    if (auto profileInterface = dyn_cast<ProfileAnnotationInterface>(nestedOp)) {
+        // TODO: readProfilerData();
+        ProfilerData data(0, 0);
+        readProfilerData(&data, nestedOp);
+        profileInterface.AttachProfilerData(data);
     }
   });
 }
 
 void AnnotateOperationsProfilePass::readProfilerData(ProfilerData* data, Operation* op) {
-    StringRef opName = op->getName()->getStringRef();
+    StringRef opName = op->getName().getStringRef();
     Location opLoc = op->getLoc(); // might be useful for mapping
 
     // TODO: Add read profile from file and mapping to current node

@@ -162,7 +162,7 @@ def TF_GetResourceInstanceInterface : OpInterface<"GetResourceInstanceInterface"
 // Annotations Handle Interfaces.
 //===----------------------------------------------------------------------===//
 
-def TF_ProfilerAnnotationsInterface : OpInterface<"ProfilerAnnotationsInterface"> {
+def TF_ProfileAnnotationInterface : OpInterface<"ProfileAnnotationInterface"> {
     let description = [{Methods to get/attach profiler data as annotations}];
 
     let methods = [
