@@ -175,7 +175,7 @@ Inputs must be of same size and shape.
   let hasFolder = 1;
 }
 
-def TF_AddV2Op : TF_Op<"AddV2", [Commutative, Pure, ResultsBroadcastableShape, TF_CwiseBinary, TF_LayoutAgnostic, TF_SameOperandsAndResultElementTypeResolveRef]>,
+def TF_AddV2Op : TF_Op<"AddV2", [Commutative, Pure, ResultsBroadcastableShape, TF_CwiseBinary, TF_LayoutAgnostic, TF_SameOperandsAndResultElementTypeResolveRef, TF_ProfileAnnotation]>,
                  WithBroadcastableBinOpBuilder {
   let summary = "Returns x + y element-wise.";
 
@@ -8671,7 +8671,7 @@ Creates a dataset that applies `f` to the outputs of `input_dataset`.
   TF_DerivedOperandTypeListAttr Targuments = TF_DerivedOperandTypeListAttr<1>;
 }
 
-def TF_MatMulOp : TF_Op<"MatMul", [Pure, TF_SameOperandsAndResultElementTypeResolveRef]> {
+def TF_MatMulOp : TF_Op<"MatMul", [Pure, TF_SameOperandsAndResultElementTypeResolveRef, TF_ProfileAnnotation]> {
   let summary = [{
 Multiply the matrix "a" by the matrix "b".
   }];
@@ -12718,7 +12718,7 @@ set to `1` depending on `keep_dims`.}]>:$output
   );
 }
 
-def TF_ReluOp : TF_Op<"Relu", [Pure, TF_Idempotent, TF_LayoutAgnostic, TF_SameOperandsAndResultTypeResolveRef]> {
+def TF_ReluOp : TF_Op<"Relu", [Pure, TF_Idempotent, TF_LayoutAgnostic, TF_SameOperandsAndResultTypeResolveRef, TF_ProfileAnnotation]> {
   let summary = "Computes rectified linear: `max(features, 0)`.";
 
   let description = [{
@@ -18536,7 +18536,7 @@ def TF_SubOp : TF_Op<"Sub", [Pure, ResultsBroadcastableShape, TF_CwiseBinary, TF
   let hasFolder = 1;
 }
 
-def TF_SumOp : TF_Op<"Sum", [Pure]> {
+def TF_SumOp : TF_Op<"Sum", [Pure, TF_ProfileAnnotation]> {
   let summary = "Computes the sum of elements across dimensions of a tensor.";
 
   let description = [{

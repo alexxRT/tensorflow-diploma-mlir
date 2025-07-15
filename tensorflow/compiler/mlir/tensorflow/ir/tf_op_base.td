@@ -139,10 +139,13 @@ def TF_UniqueResourceAllocation: TraitList<[
     NativeOpTrait<"TF::UniqueResourceAllocation">
 ]>;
 
-// This traite used for profiler annotated operations
+// This trait used for profiler annotated operations
 // Effort to build bridge between profiler data and MLIR
 
-def TF_ProfileAnnotaion: NativeOpTrait<"TF::ProfileAnnotation">;
+def TF_ProfileAnnotation: TraitList<[
+  TF_ProfileAnnotationInterface,
+  NativeOpTrait<"TF::ProfileAnnotation">
+]>;
 
 //===----------------------------------------------------------------------===//
 // Rank/Shape helpers.

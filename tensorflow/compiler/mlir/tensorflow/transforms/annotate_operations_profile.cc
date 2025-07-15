@@ -15,6 +15,11 @@ limitations under the License.
 
 #include <cstdint>
 #include <memory>
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <sstream>
+#include <unordered_map>
 
 #include "llvm/ADT/DenseSet.h"
 #include "llvm/ADT/STLExtras.h"
@@ -49,12 +54,43 @@ struct AnnotateOperationsProfilePass
 
   AnnotateOperationsProfilePass() = default;
   explicit AnnotateOperationsProfilePass(std::string profilePath)
-      : profileDataFilePath(std::move(profilePath)) {}
+      : profileDataFilePath(std::move(profilePath)) {
+
+    ModuleOp op = getOperation();
+    std::ifstream file(profileDataFilePath);
+
+    if (!file) {
+      llvm::outs() << "[TFProfileGuided] Error! Unable to read from file " << profileDataFilePath << "\n" << "All times will be set to 0!\n";
+      op.emitError("Failed to read profile from input file!");
+      return;
+    }
+
+    std::string line;
+    std::getline(file, line); // read first line to check columns names
+
+    std::vector<std::string> fileHeader = parseByDelimeter(line, ',');
+    if (fileHeader.size() == 0 ||
+        fileHeader[0] != std::string("name") ||
+        fileHeader[1] != std::string("ts") ||
+        fileHeader[2] != std::string("duration")) {
+        llvm::outs() << "[TFProfileGuided] Error! Wrong header format in file: " << profileDataFilePath << "\n" << "All times will be set to 0!\n";
+        op.emitError("Failed to read profile from input file!");
+        return;
+    }
+
+    while (std::getline(file, line)) { // reading profile data to later use on operations
+      std::vector<std::string> opData = parseByDelimeter(line, ',');
+      readData.insert({opData[0], ProfilerData(std::stol(opData[1]), std::stol(opData[2]))});
+    }
+
+    file.close();
+  };
 
   void runOnOperation() override;
 
   private:
-    void readProfilerData(ProfilerData* data, Operation* op);
+    std::vector<std::string> parseByDelimeter(std::string& str, const char delimiter);
+    std::unordered_map<std::string, ProfilerData> readData;
     std::string profileDataFilePath;
 };
 
@@ -62,22 +98,32 @@ void AnnotateOperationsProfilePass::runOnOperation() {
   ModuleOp op = getOperation();
 
   op.walk([&](mlir::Operation* nestedOp) {
-    if (auto profileInterface = dyn_cast<ProfileAnnotationInterface>(nestedOp)) {
-        // TODO: readProfilerData();
+    if (nestedOp->hasTrait<mlir::OpTrait::TF::ProfileAnnotation>()) {
         ProfilerData data(0, 0);
-        readProfilerData(&data, nestedOp);
+
+        std::string opName = nestedOp->getName().getStringRef().str();
+        if (readData.find(opName) != readData.end())
+          data = readData.at(opName);
+
+        auto profileInterface = dyn_cast<ProfileAnnotationInterface>(nestedOp);
         profileInterface.AttachProfilerData(data);
     }
   });
 }
 
-void AnnotateOperationsProfilePass::readProfilerData(ProfilerData* data, Operation* op) {
-    StringRef opName = op->getName().getStringRef();
-    Location opLoc = op->getLoc(); // might be useful for mapping
+std::vector<std::string> AnnotateOperationsProfilePass::parseByDelimeter(std::string& str, const char delimeter) {
+ std::vector<std::string> parsed;
 
-    // TODO: Add read profile from file and mapping to current node
-    data->timestamp = 0;
-    data->duration = 0;
+  if (str.empty())
+    return parsed;
+
+  std::stringstream ss(str);
+  std::string entry;
+
+  while (std::getline(ss, entry, delimeter)) {
+    parsed.push_back(entry);
+  }
+  return parsed;
 }
 
 std::unique_ptr<OperationPass<ModuleOp>>

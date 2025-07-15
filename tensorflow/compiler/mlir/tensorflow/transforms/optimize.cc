@@ -188,7 +188,7 @@ void CreateTFStandardPipeline(OpPassManager &pm,
 void CreateTFProfileGuidedPipeline(OpPassManager &pm,
                               const ProfileGuidedPipelineOptions &options) {
 
-      OpPassManager &module_op_pm = pm.nest<ModuleOp>();
+      // OpPassManager &module_op_pm = pm.nest<ModuleOp>();
       if (options.path_to_profile.empty()) {
           llvm::outs() << "[TFProfileGuided]: WARNING No file presented to load profile data. ";
           llvm::outs() << "Result transformations are likely ide. Using default annonations: " << options.path_to_profile << "\n" ;
@@ -197,7 +197,7 @@ void CreateTFProfileGuidedPipeline(OpPassManager &pm,
           llvm::outs() << "[TFProfileGuided]: Loading profile from " << options.path_to_profile << ".\n";
       }
 
-      module_op_pm.addPass(TF::CreateAnnotateOperationsProfilePass(options.path_to_profile));
+      pm.addPass(TF::CreateAnnotateOperationsProfilePass(options.path_to_profile));
       // add profiler annotations to TensorFlow operations
 
 

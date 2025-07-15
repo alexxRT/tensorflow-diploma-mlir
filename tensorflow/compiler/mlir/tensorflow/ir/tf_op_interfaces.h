@@ -139,11 +139,11 @@ ResourceHandleValueAndId GetResourceHandleValueAndIdBase(
 //===----------------------------------------------------------------------===//
 
 struct ProfilerData {
-    ProfilerData(int ts, int dur) : timestamp(ts), duration(dur) {};
+    ProfilerData(long int ts, long int dur) : timestamp(ts), duration(dur) {};
 
     // maybe expand further as analysis grows
-    int timestamp;
-    int duration;
+    long int timestamp;
+    long int duration;
 };
 
 #include "tensorflow/compiler/mlir/tensorflow/ir/tf_op_interfaces.h.inc"
